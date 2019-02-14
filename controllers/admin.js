@@ -18,10 +18,16 @@ exports.getAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    const product = new Product(null, title, imageUrl, price, description);
-    product.save().then(() => {
-      res.redirect('/');
-    }).catch(err => console.log(err));
+    Product.create({
+      title: title,
+      imageUrl: imageUrl,
+      price: price,
+      description: description
+    }).then(res => console.log(res)).catch(err => console.log(err))
+    // const product = new Product(null, title, imageUrl, price, description);
+    // product.save().then(() => {
+    //   res.redirect('/');
+    // }).catch(err => console.log(err));
   }
 
   exports.getEditProduct = (req, res, next) => {
@@ -30,17 +36,29 @@ exports.getAddProduct = (req, res, next) => {
       return res.redirect('/');
     }
     const prodId = req.params.productId;
-    Product.findById(prodId, product => {
-      if(!product){
+    Product.findById(prodId).then(product => {
+      if(!product) {
         return res.redirect('/');
       }
-      res.render('admin/edit-product', 
-      {pageTitle: 'Edit Product', 
-      path: '/admin/add-product', 
+      res.render('admin/edit-product', {
+      pageTitle: 'Edit Product',
+      path: '/admin/edit-product',
       editing: editMode,
       product: product
-      })  
-    })
+      });
+    }).catch(err => console.log(err));
+
+    // Product.findById(prodId, product => {
+    //   if(!product){
+    //     return res.redirect('/');
+    //   }
+    //   res.render('admin/edit-product', {
+    //   pageTitle: 'Edit Product', 
+    //   path: '/admin/add-product', 
+    //   editing: editMode,
+    //   product: product
+    //   })  
+    // })
     
     //res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
   }
@@ -58,16 +76,24 @@ exports.getAddProduct = (req, res, next) => {
   }
 
   exports.getAdminProducts = (req, res, next) => {
-    Product.fetchAllProducts((products) => {
-        res.render('admin/products', {
-          prods : products, 
-          pageTitle : 'Admin Products', 
-          path: '/admin/products', 
-          // hasProducts: products.length > 0, 
-          // productCss: true,
-          // activeShop: true
-          });
+    Product.findAll().then(products => {
+      res.render('admin/products', {
+        prods: products,
+        pageTitle: 'Admin Products',
+        path: '/admin/products'
       })
+    }).catch(error => console.log(error));
+
+    // Product.fetchAllProducts((products) => {
+    //     res.render('admin/products', {
+    //       prods : products, 
+    //       pageTitle : 'Admin Products', 
+    //       path: '/admin/products', 
+    //       // hasProducts: products.length > 0, 
+    //       // productCss: true,
+    //       // activeShop: true
+    //       });
+    //   })
   }
 
   exports.postDeleteProduct = (req, res, next) => {
